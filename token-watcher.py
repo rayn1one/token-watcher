@@ -4,6 +4,8 @@ import json
 import struct
 import base58
 import websockets
+from pump_fun import buy
+from config import sol_in, slippage, WSS_URL
 
 class TokenWatcher:
     def __init__(self, wss_url):
@@ -90,6 +92,14 @@ class TokenWatcher:
                                 print(f"\nSignature: {log_data.get('signature')}")
                                 for k, v in parsed.items():
                                     print(f"{k}: {v}")
+
+                                #BUY TOKEN
+                                try:
+                                    mint_str = parsed["mint"]
+                                    buy(mint_str, sol_in, slippage)
+                                    print(f"✅ Купили токен {mint_str} на {sol_in} SOL со slippage {slippage}%")
+                                except Exception as e:
+                                    print(f"❌ Ошибка при покупке токена: {e}")
                                 print("---" * 20)
         except Exception as e:
             print(f"Error processing message: {e}")
@@ -150,5 +160,5 @@ class TokenWatcher:
             task.cancel()
 
 if __name__ == "__main__":
-    watcher = TokenWatcher("wss-url")
+    watcher = TokenWatcher(WSS_URL)
     asyncio.run(watcher.run())
